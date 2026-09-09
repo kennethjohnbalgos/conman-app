@@ -10,4 +10,5 @@ swiftc -parse-as-library -target x86_64-apple-macosx14.0 SSHConfigManager.swift 
 lipo -create "$build_dir/SSHConfigManager-arm64" "$build_dir/SSHConfigManager-x86_64" -output "$bundle/Contents/MacOS/SSH Config Manager"
 cp Info.plist "$bundle/Contents/Info.plist"
 cp AppIcon.icns "$bundle/Contents/Resources/AppIcon.icns"
+codesign --force --sign - --identifier local.ssh-config-manager "$bundle"
 open "$bundle"
