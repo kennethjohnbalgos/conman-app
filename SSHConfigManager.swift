@@ -12,7 +12,11 @@ struct SSHEntry: Identifiable, Equatable {
 
 @main
 struct SSHConfigManagerApp: App {
-    var body: some Scene { WindowGroup { ContentView() } }
+    var body: some Scene {
+        WindowGroup { ContentView() }
+            .defaultSize(width: 640, height: 620)
+            .windowResizability(.contentSize)
+    }
 }
 
 struct ContentView: View {
@@ -44,10 +48,10 @@ struct ContentView: View {
                             Text(entry.title).lineLimit(1).tag(entry.id)
                         }
                     }
-                    .frame(minWidth: 220, maxHeight: .infinity)
+                    .frame(minWidth: 170, maxHeight: .infinity)
                     .onChange(of: selection) { _, id in loadSelection(id) }
                 }
-                .frame(maxWidth: 280, maxHeight: .infinity)
+                .frame(maxWidth: 190, maxHeight: .infinity)
 
                 Group {
                     if showRecent {
@@ -100,7 +104,7 @@ struct ContentView: View {
             }
             .padding()
         }
-        .frame(minWidth: 730, maxWidth: .infinity, minHeight: 460, maxHeight: .infinity)
+        .frame(minWidth: 620, idealWidth: 640, maxWidth: 680, minHeight: 500, idealHeight: 620, maxHeight: 800)
         .onAppear { loadConfig() }
         .alert(item: $confirmation) { action in
             switch action {
