@@ -1,4 +1,4 @@
 .DS_Store
-SSH Config Manager.app/
 AppIcon.iconset/
 __pycache__/
+.build/

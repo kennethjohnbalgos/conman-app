@@ -1,20 +1,44 @@
 # SSH Config Manager
 
-A native SwiftUI macOS app for editing `~/.ssh/config`, with no third-party dependencies.
+A lightweight native macOS app for viewing and editing `~/.ssh/config`.
 
-Build and launch it once from Terminal:
+It includes a ready-to-open app bundle and its Swift source code. No third-party dependencies are used.
+
+## Install the included app
+
+1. Download this repository as a ZIP from GitHub and unzip it, or clone it with Git.
+2. Drag **SSH Config Manager.app** to your Applications folder (or any folder you prefer).
+3. Open the app. Because this app is not notarized, macOS may warn that it is from an unidentified developer. Control-click the app, choose **Open**, then choose **Open** again.
+4. When you first use **Connect**, allow the app to control Terminal if macOS asks. This is how it opens your SSH connection in Terminal.
+
+The included build is universal, so it works on both Intel and Apple Silicon Macs. If it does not open on your Mac, build it locally using the instructions below.
+
+It requires macOS 14 Sonoma or later.
+
+## Build from source
+
+You need Apple’s Command Line Tools or Xcode, which provides the standard `swiftc` compiler.
 
 ```sh
-cd /Users/Kenn/.codex/.chatgpt-projects/g-p-6a915e7dc6ac8191a90f1e26b00f7651/ssh-config-manager
+git clone git@github.com:kennethjohnbalgos/ssh-app.git
+cd ssh-app
 ./build.sh
 ```
 
-This creates **SSH Config Manager.app** in the same folder. You can then open that app normally from Finder. This needs Apple's Command Line Tools / Xcode (the standard `swiftc` compiler).
+The command creates and opens **SSH Config Manager.app** in the project folder. You can then move it to Applications.
+
+## How to use it
+
+- **Recent** is the default page and shows up to 20 hosts you have connected to recently.
+- Choose a host from **Hosts** to view or edit it. Hosts are listed alphabetically.
+- Use **Add** to create a host; new entries default `IdentityFile` to `~/.ssh/id_rsa`.
+- **Connect** opens Terminal using the current form values, even if you have not saved your edits yet.
+- **Test** makes a non-interactive SSH connection attempt with an eight-second timeout and shows whether it succeeded.
+- **Save** asks for confirmation, writes the current configuration to `~/.ssh/config`, and creates a timestamped backup in `~/.ssh/config-manager-backups` first.
+- **Delete** asks for confirmation, then immediately backs up and updates `~/.ssh/config`.
+
+The app keeps unedited SSH directives and comments within each host entry.
 
 ## After changing the project manually
 
-Yes—run `./build.sh` again after changing the Swift source, app icon, or `Info.plist`. It recompiles the application and replaces the contents of **SSH Config Manager.app**. If the app is already open, quit it first, then open the rebuilt app again.
-
-It lists existing `Host` entries alphabetically; lets you add, edit, and delete entries; and supplies `~/.ssh/id_rsa` as the default identity file for a new entry. Save applies form changes and writes the config. Each host has Connect (opens Terminal with the SSH command) and Test (a non-interactive connection check with an 8-second timeout).
-
-Saving always asks for confirmation. Before it replaces `~/.ssh/config`, it writes a timestamped backup into `~/.ssh/config-manager-backups`.
+Yes—run `./build.sh` after changing the Swift source, app icon, or `Info.plist`. It recompiles the app and updates **SSH Config Manager.app**. If the app is already open, quit it before rebuilding, then open the rebuilt app.
