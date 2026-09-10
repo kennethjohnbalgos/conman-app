@@ -40,10 +40,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         guard let button = statusItem?.button else { return }
-        button.image = NSImage(systemSymbolName: "terminal.fill", accessibilityDescription: "SSH Config Manager")
+        button.image = NSImage(systemSymbolName: "terminal.fill", accessibilityDescription: "SSH ConMan")
         button.target = self
         button.action = #selector(openMainWindow)
-        button.toolTip = "SSH Config Manager"
+        button.toolTip = "SSH ConMan"
         registerOpenShortcut()
     }
 
@@ -162,7 +162,7 @@ struct ContentView: View {
                 Alert(title: Text("Delete host?"), message: Text("Remove '\(name)' from ~/.ssh/config? A backup will be created first."), primaryButton: .destructive(Text("Delete")) { deleteAndSave(id) }, secondaryButton: .cancel())
             }
         }
-        .alert("SSH Config Manager", isPresented: Binding(get: { alertMessage != nil }, set: { if !$0 { alertMessage = nil } })) {
+        .alert("SSH ConMan", isPresented: Binding(get: { alertMessage != nil }, set: { if !$0 { alertMessage = nil } })) {
             Button("OK") { alertMessage = nil }
         } message: { Text(alertMessage ?? "") }
     }

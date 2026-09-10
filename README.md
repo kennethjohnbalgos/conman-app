@@ -1,4 +1,4 @@
-# SSH Config Manager
+# SSH ConMan
 
 A lightweight native macOS app for viewing and editing `~/.ssh/config`.
 
@@ -9,7 +9,7 @@ It includes a ready-to-open app bundle and its Swift source code. No third-party
 ## Install the included app
 
 1. Download this repository as a ZIP from GitHub and unzip it, or clone it with Git.
-2. Drag **SSH Config Manager.app** to your Applications folder (or any folder you prefer).
+2. Drag **SSH ConMan.app** to your Applications folder (or any folder you prefer).
 3. Open the app. Because this app is not notarized, macOS may warn that it is from an unidentified developer. Control-click the app, choose **Open**, then choose **Open** again.
 4. When you first use **Connect**, allow the app to control Terminal if macOS asks. This is how it opens your SSH connection in Terminal.
 
@@ -27,7 +27,7 @@ cd ssh-app
 ./build.sh
 ```
 
-The command creates and opens **SSH Config Manager.app** in the project folder. You can then move it to Applications.
+The command creates and opens **SSH ConMan.app** in the project folder. You can then move it to Applications.
 
 ## How to use it
 
@@ -43,4 +43,4 @@ The app keeps unedited SSH directives and comments within each host entry.
 
 ## After changing the project manually
 
-Yes—run `./build.sh` after changing the Swift source, app icon, or `Info.plist`. It recompiles the app and updates **SSH Config Manager.app**. If the app is already open, quit it before rebuilding, then open the rebuilt app.
+Yes—run `./build.sh` after changing the Swift source, app icon, or `Info.plist`. It recompiles the app and updates **SSH ConMan.app**. If the app is already open, quit it before rebuilding, then open the rebuilt app.
