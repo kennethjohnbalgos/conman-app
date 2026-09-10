@@ -2,6 +2,8 @@
 
 A lightweight native macOS app for viewing and editing `~/.ssh/config`.
 
+It runs from a terminal icon in the macOS menu bar rather than the Dock. Click the icon, or press Command–Option–Shift–/, to show the window. Press Escape to close the window while leaving the menu-bar app running.
+
 It includes a ready-to-open app bundle and its Swift source code. No third-party dependencies are used.
 
 ## Install the included app

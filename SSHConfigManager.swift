@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import Carbon.HIToolbox
 
 struct SSHEntry: Identifiable, Equatable {
     var id = UUID()
@@ -12,10 +13,51 @@ struct SSHEntry: Identifiable, Equatable {
 
 @main
 struct SSHConfigManagerApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @Environment(\.openWindow) private var openWindow
+
     var body: some Scene {
-        WindowGroup { ContentView() }
+        WindowGroup(id: "main") {
+            ContentView()
+                .onAppear {
+                    appDelegate.openWindow = {
+                        openWindow(id: "main")
+                        NSApplication.shared.activate(ignoringOtherApps: true)
+                    }
+                }
+        }
             .defaultSize(width: 640, height: 620)
             .windowResizability(.contentSize)
+    }
+}
+
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    var openWindow: (() -> Void)?
+    private var statusItem: NSStatusItem?
+    private var hotKey: EventHotKeyRef?
+    private var eventHandler: EventHandlerRef?
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        guard let button = statusItem?.button else { return }
+        button.image = NSImage(systemSymbolName: "terminal.fill", accessibilityDescription: "SSH Config Manager")
+        button.target = self
+        button.action = #selector(openMainWindow)
+        button.toolTip = "SSH Config Manager"
+        registerOpenShortcut()
+    }
+
+    @objc private func openMainWindow() { openWindow?() }
+
+    private func registerOpenShortcut() {
+        var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
+        InstallEventHandler(GetApplicationEventTarget(), { _, _, userData in
+            guard let userData else { return noErr }
+            Unmanaged<AppDelegate>.fromOpaque(userData).takeUnretainedValue().openMainWindow()
+            return noErr
+        }, 1, &eventType, Unmanaged.passUnretained(self).toOpaque(), &eventHandler)
+        let identifier = EventHotKeyID(signature: OSType(0x5353484D), id: 1)
+        RegisterEventHotKey(UInt32(kVK_ANSI_Slash), UInt32(cmdKey | optionKey | shiftKey), identifier, GetApplicationEventTarget(), 0, &hotKey)
     }
 }
 
@@ -69,6 +111,11 @@ struct ContentView: View {
                                         }
                                         Spacer()
                                         Button("Connect") { connect(to: entry) }
+                                        Button(role: .destructive) { removeRecent(entry.title) } label: {
+                                            Image(systemName: "trash")
+                                        }
+                                        .buttonStyle(.borderless)
+                                        .help("Remove from Recent")
                                     }
                                 }
                             }
@@ -106,6 +153,7 @@ struct ContentView: View {
         }
         .frame(minWidth: 620, idealWidth: 640, maxWidth: 680, minHeight: 500, idealHeight: 620, maxHeight: 800)
         .onAppear { loadConfig() }
+        .onExitCommand { NSApplication.shared.keyWindow?.performClose(nil) }
         .alert(item: $confirmation) { action in
             switch action {
             case .save:
@@ -249,6 +297,10 @@ struct ContentView: View {
         recentHostTitles.removeAll { $0 == title }
         recentHostTitles.insert(title, at: 0)
         recentHostTitles = Array(recentHostTitles.prefix(20))
+        UserDefaults.standard.set(recentHostTitles, forKey: "recentSSHHosts")
+    }
+    private func removeRecent(_ title: String) {
+        recentHostTitles.removeAll { $0 == title }
         UserDefaults.standard.set(recentHostTitles, forKey: "recentSSHHosts")
     }
     private func test(_ entry: SSHEntry) {
