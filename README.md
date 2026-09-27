@@ -1,25 +1,45 @@
 # SSH ConMan
 
-A lightweight native macOS app for viewing and editing `~/.ssh/config`.
+A native menu bar app for managing `~/.ssh/config` on macOS 14 Sonoma or later. The included app supports both Intel and Apple Silicon Macs.
 
-It runs from a terminal icon in the macOS menu bar rather than the Dock. Click the icon, or press Command–Option–Shift–/, to show the window. Press Escape to close the window while leaving the menu-bar app running.
+## Install with Homebrew
 
-It includes a ready-to-open app bundle and its Swift source code. No third-party dependencies are used.
+```sh
+brew tap kennethjohnbalgos/ssh-app
+brew install --cask kennethjohnbalgos/ssh-app/ssh-conman
+open -a 'SSH ConMan'
+```
 
-## Install the included app
+The app appears as a terminal icon in the menu bar, not in the Dock. If macOS warns that the app is from an unidentified developer, open **Applications**, Control-click **SSH ConMan**, and choose **Open**. The app is ad hoc signed and is not notarized.
 
-1. Download this repository as a ZIP from GitHub and unzip it, or clone it with Git.
-2. Drag **SSH ConMan.app** to your Applications folder (or any folder you prefer).
-3. Open the app. Because this app is not notarized, macOS may warn that it is from an unidentified developer. Control-click the app, choose **Open**, then choose **Open** again.
-4. When you first use **Connect**, allow the app to control Terminal if macOS asks. This is how it opens your SSH connection in Terminal.
+To uninstall the app:
 
-The included build is universal, so it works on both Intel and Apple Silicon Macs. If it does not open on your Mac, build it locally using the instructions below.
+```sh
+brew uninstall --cask kennethjohnbalgos/ssh-app/ssh-conman
+brew untap kennethjohnbalgos/ssh-app
+```
 
-It requires macOS 14 Sonoma or later.
+Uninstalling leaves your `~/.ssh/config`, its backups, and SSH keys untouched. If you turned on **Start at login**, switch it off in the app before uninstalling, or remove SSH ConMan from **System Settings → General → Login Items** afterward.
+
+## Install without Homebrew
+
+Download the repository from GitHub and drag **SSH ConMan.app** to Applications. Open it from Applications. The first **Connect** action may ask for permission to control Terminal; choose **Allow**.
+
+## Use the app
+
+- Click the menu bar terminal icon to open or focus the window. Command–Option–Shift–/ also opens it. Escape closes the window while the menu bar app keeps running.
+- The app opens on **Recent Hosts**, showing up to 20 hosts you have connected to. Each row has **Connect** and a trash button to remove it from Recent.
+- Use **Search hosts** above the alphabetical list to filter hosts as you type. Select a host to edit its fields.
+- Click **Recent** at the top of the editor to return to Recent Hosts.
+- Open the bottom-left gear menu for **Add Host**, **Start at login**, and **Quit**. Add Host starts a new form with `~/.ssh/id_rsa` as the default identity file.
+- **Connect** opens Terminal using the values currently shown in the form, even before you save them. **Test** checks SSH access without prompting for a password and reports success or failure.
+- **Save** confirms the change and writes `~/.ssh/config`. **Delete** is available for an existing host below the form; after confirmation, it removes the host immediately. Both actions create a timestamped copy of the previous config in `~/.ssh/config-manager-backups`.
+
+The app keeps other SSH directives and comments within each host entry. A non-interactive Test can fail when a host requires a password or a first-time host-key prompt, even if an interactive Connect works.
 
 ## Build from source
 
-You need Apple’s Command Line Tools or Xcode, which provides the standard `swiftc` compiler.
+Install Apple's Command Line Tools or Xcode, then run:
 
 ```sh
 git clone git@github.com:kennethjohnbalgos/ssh-app.git
@@ -27,20 +47,4 @@ cd ssh-app
 ./build.sh
 ```
 
-The command creates and opens **SSH ConMan.app** in the project folder. You can then move it to Applications.
-
-## How to use it
-
-- **Recent** is the default page and shows up to 20 hosts you have connected to recently.
-- Choose a host from **Hosts** to view or edit it. Hosts are listed alphabetically.
-- Use **Add** to create a host; new entries default `IdentityFile` to `~/.ssh/id_rsa`.
-- **Connect** opens Terminal using the current form values, even if you have not saved your edits yet.
-- **Test** makes a non-interactive SSH connection attempt with an eight-second timeout and shows whether it succeeded.
-- **Save** asks for confirmation, writes the current configuration to `~/.ssh/config`, and creates a timestamped backup in `~/.ssh/config-manager-backups` first.
-- **Delete** asks for confirmation, then immediately backs up and updates `~/.ssh/config`.
-
-The app keeps unedited SSH directives and comments within each host entry.
-
-## After changing the project manually
-
-Yes—run `./build.sh` after changing the Swift source, app icon, or `Info.plist`. It recompiles the app and updates **SSH ConMan.app**. If the app is already open, quit it before rebuilding, then open the rebuilt app.
+The script compiles both Mac architectures, signs the bundle locally, and opens **SSH ConMan.app**. Use `./build.sh --no-open` to rebuild without launching. Rebuild after editing the Swift source, icon, or `Info.plist`, and quit any older running copy before opening the new one.

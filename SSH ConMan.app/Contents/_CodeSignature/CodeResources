@@ -4,6 +4,10 @@
 <dict>
 	<key>files</key>
 	<dict>
+		<key>Resources/AppIcon-v2.icns</key>
+		<data>
+		eGsnDYK/ApygvpijbyXXA+CQc+0=
+		</data>
 		<key>Resources/AppIcon.icns</key>
 		<data>
 		/CyEmVeZye7Js+KNPXJUOogYp0o=
@@ -11,6 +15,13 @@
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>Resources/AppIcon-v2.icns</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			5S9+GzwPPlV64KQOyf3Qc/KHbhcNdNsceKvTZrGHyj8=
+			</data>
+		</dict>
 		<key>Resources/AppIcon.icns</key>
 		<dict>
 			<key>hash2</key>

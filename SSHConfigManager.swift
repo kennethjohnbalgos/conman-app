@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import Carbon.HIToolbox
+import ServiceManagement
 
 struct SSHEntry: Identifiable, Equatable {
     var id = UUID()
@@ -17,11 +18,15 @@ struct SSHConfigManagerApp: App {
     @Environment(\.openWindow) private var openWindow
 
     var body: some Scene {
-        WindowGroup(id: "main") {
+        Window("SSH ConMan", id: "main") {
             ContentView()
                 .onAppear {
                     appDelegate.openWindow = {
-                        openWindow(id: "main")
+                        if let window = NSApplication.shared.windows.first(where: { $0.canBecomeKey }) {
+                            window.makeKeyAndOrderFront(nil)
+                        } else {
+                            openWindow(id: "main")
+                        }
                         NSApplication.shared.activate(ignoringOtherApps: true)
                     }
                 }
@@ -79,17 +84,22 @@ struct ContentView: View {
     @State private var hasStructuralChanges = false
     @State private var showRecent = true
     @State private var recentHostTitles: [String] = []
+    @State private var searchText = ""
 
     var body: some View {
         VStack(spacing: 0) {
             HStack(alignment: .top, spacing: 18) {
                 VStack(alignment: .leading) {
                     Text("Hosts").font(.headline)
+                    TextField("Search hosts", text: $searchText)
+                        .textFieldStyle(.roundedBorder)
                     List(selection: $selection) {
-                        ForEach(entries) { entry in
+                        ForEach(filteredEntries) { entry in
                             Text(entry.title).lineLimit(1).tag(entry.id)
+                                .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
                         }
                     }
+                    .listStyle(.plain)
                     .frame(minWidth: 170, maxHeight: .infinity)
                     .onChange(of: selection) { _, id in loadSelection(id) }
                 }
@@ -117,12 +127,17 @@ struct ContentView: View {
                                         .buttonStyle(.borderless)
                                         .help("Remove from Recent")
                                     }
+                                    .listRowInsets(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
                                 }
+                                .listStyle(.plain)
                             }
                         }
                     } else {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Host details").font(.headline)
+                            HStack {
+                                Button("Recent") { showRecentPage() }
+                                Text("Host details").font(.headline)
+                            }
                             formField("Host title", text: $title, hint: "github-work")
                             formField("HostName", text: $hostName, hint: "github.com")
                             formField("User", text: $user, hint: "git")
@@ -134,6 +149,10 @@ struct ContentView: View {
                                 Button("Test") { test(formEntry) }.disabled(formEntry.hostNameOrTitle.isEmpty)
                                 Button("Save") { requestSave() }.keyboardShortcut("s", modifiers: .command).disabled(!hasChanges)
                             }
+                            if selection != nil {
+                                Button("Delete", role: .destructive) { requestDelete() }
+                                    .foregroundStyle(.red)
+                            }
                         }
                     }
                 }
@@ -142,10 +161,18 @@ struct ContentView: View {
             .padding()
             .frame(maxHeight: .infinity, alignment: .top)
             HStack {
-                Button("Add") { clearForm() }
-                Button("Delete", role: .destructive) { requestDelete() }
-                    .disabled(selection == nil)
-                Button("Recent") { showRecentPage() }
+                Menu {
+                    Button("Add Host") { clearForm() }
+                    Toggle("Start at login", isOn: Binding(
+                        get: { SMAppService.mainApp.status == .enabled || SMAppService.mainApp.status == .requiresApproval },
+                        set: { setStartAtLogin($0) }
+                    ))
+                    Divider()
+                    Button("Quit") { NSApplication.shared.terminate(nil) }
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .help("Settings")
                 Spacer()
                 Text(status).font(.caption).foregroundStyle(.secondary)
             }
@@ -173,11 +200,26 @@ struct ContentView: View {
     }
 
     private func formField(_ label: String, text: Binding<String>, hint: String) -> some View {
-        HStack { Text(label).frame(width: 90, alignment: .trailing); TextField(hint, text: text).textFieldStyle(.roundedBorder) }
+        HStack { Text(label).frame(width: 90, alignment: .leading); TextField(hint, text: text).textFieldStyle(.roundedBorder) }
     }
 
     private var recentEntries: [SSHEntry] {
         recentHostTitles.compactMap { recentTitle in entries.first { $0.title == recentTitle } }
+    }
+    private var filteredEntries: [SSHEntry] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return query.isEmpty ? entries : entries.filter {
+            $0.title.localizedStandardContains(query) || $0.hostName.localizedStandardContains(query)
+        }
+    }
+    private func setStartAtLogin(_ enabled: Bool) {
+        do {
+            if enabled { try SMAppService.mainApp.register() }
+            else { try SMAppService.mainApp.unregister() }
+            if SMAppService.mainApp.status == .requiresApproval {
+                alertMessage = "Allow SSH ConMan in System Settings → General → Login Items to start it at login."
+            }
+        } catch { show(error) }
     }
 
     private func loadConfig() {
@@ -279,7 +321,6 @@ struct ContentView: View {
         } catch { show(error) }
     }
     private func connect(to entry: SSHEntry) {
-        recordRecent(entry.title)
         let destination = entry.user.isEmpty ? entry.hostNameOrTitle : "\(entry.user)@\(entry.hostNameOrTitle)"
         var command = "ssh"
         if !entry.identityFile.isEmpty { command += " -i \(shellQuote(expandHome(entry.identityFile)))" }
@@ -291,6 +332,8 @@ struct ContentView: View {
         if let errorInfo {
             let reason = errorInfo[NSAppleScript.errorMessage] as? String ?? "Unknown macOS automation error."
             alertMessage = "Could not open Terminal.\n\n\(reason)"
+        } else {
+            recordRecent(entry.title)
         }
     }
     private func recordRecent(_ title: String) {
