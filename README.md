@@ -12,6 +12,14 @@ open -a 'SSH ConMan'
 
 The app appears as a terminal icon in the menu bar. While its window is open, it also appears in the Dock and app switcher; closing the window leaves the menu bar icon running. If macOS warns that the app is from an unidentified developer, open **Applications**, Control-click **SSH ConMan**, and choose **Open**. The app is ad hoc signed and is not notarized.
 
+To update an existing Homebrew installation, quit SSH ConMan from its gear menu, then run:
+
+```sh
+brew update
+brew upgrade --cask kennethjohnbalgos/conman-app/ssh-conman
+open -a 'SSH ConMan'
+```
+
 To uninstall the app:
 
 ```sh
