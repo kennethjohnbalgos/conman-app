@@ -21,6 +21,7 @@ struct SSHConfigManagerApp: App {
         Window("SSH ConMan", id: "main") {
             ContentView()
                 .onAppear {
+                    NSApplication.shared.setActivationPolicy(.regular)
                     appDelegate.openWindow = {
                         if let window = NSApplication.shared.windows.first(where: { $0.canBecomeKey }) {
                             window.makeKeyAndOrderFront(nil)
@@ -43,6 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var eventHandler: EventHandlerRef?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        NotificationCenter.default.addObserver(self, selector: #selector(windowWillClose), name: NSWindow.willCloseNotification, object: nil)
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         guard let button = statusItem?.button else { return }
         button.image = NSImage(systemSymbolName: "terminal.fill", accessibilityDescription: "SSH ConMan")
@@ -52,7 +54,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         registerOpenShortcut()
     }
 
-    @objc private func openMainWindow() { openWindow?() }
+    @objc private func openMainWindow() {
+        NSApplication.shared.setActivationPolicy(.regular)
+        openWindow?()
+    }
+
+    @objc private func windowWillClose(_ notification: Notification) {
+        DispatchQueue.main.async {
+            if !NSApplication.shared.windows.contains(where: { $0.isVisible && $0.canBecomeKey }) {
+                NSApplication.shared.setActivationPolicy(.accessory)
+            }
+        }
+    }
 
     private func registerOpenShortcut() {
         var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
@@ -91,8 +104,9 @@ struct ContentView: View {
             HStack(alignment: .top, spacing: 18) {
                 VStack(alignment: .leading) {
                     Text("Hosts").font(.headline)
-                    TextField("Search hosts", text: $searchText)
+                    TextField("Search...", text: $searchText)
                         .textFieldStyle(.roundedBorder)
+                        .padding(.top, 8)
                     List(selection: $selection) {
                         ForEach(filteredEntries) { entry in
                             Text(entry.title).lineLimit(1).tag(entry.id)
@@ -134,10 +148,7 @@ struct ContentView: View {
                         }
                     } else {
                         VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Button("Recent") { showRecentPage() }
-                                Text("Host details").font(.headline)
-                            }
+                            Text("Host details").font(.headline)
                             formField("Host title", text: $title, hint: "github-work")
                             formField("HostName", text: $hostName, hint: "github.com")
                             formField("User", text: $user, hint: "git")
@@ -145,13 +156,13 @@ struct ContentView: View {
                             Divider().padding(.vertical, 5)
                             HStack {
                                 Spacer()
+                                if selection != nil {
+                                    Button("Delete", role: .destructive) { requestDelete() }
+                                        .foregroundStyle(.red)
+                                }
                                 Button("Connect") { connect(to: formEntry) }.disabled(formEntry.hostNameOrTitle.isEmpty)
                                 Button("Test") { test(formEntry) }.disabled(formEntry.hostNameOrTitle.isEmpty)
                                 Button("Save") { requestSave() }.keyboardShortcut("s", modifiers: .command).disabled(!hasChanges)
-                            }
-                            if selection != nil {
-                                Button("Delete", role: .destructive) { requestDelete() }
-                                    .foregroundStyle(.red)
                             }
                         }
                     }
@@ -173,6 +184,8 @@ struct ContentView: View {
                     Image(systemName: "gearshape")
                 }
                 .help("Settings")
+                Button("Recent") { showRecentPage() }
+                    .disabled(showRecent)
                 Spacer()
                 Text(status).font(.caption).foregroundStyle(.secondary)
             }

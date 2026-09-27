@@ -1,6 +1,6 @@
 cask "ssh-conman" do
-  version "1.1.0"
-  sha256 "e0bee3c65a76aa9819356575a04ce2635e5e602daa8dde347f01158c9a8efddd"
+  version "1.1.1"
+  sha256 "2d28d881674a8691f7b09bc4493e5395a241e8fecfa9a706c44f83bc030ab80c"
 
   url "https://raw.githubusercontent.com/kennethjohnbalgos/ssh-app/main/SSH-ConMan-#{version}.zip"
   name "SSH ConMan"

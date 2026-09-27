@@ -10,7 +10,7 @@ brew install --cask kennethjohnbalgos/ssh-app/ssh-conman
 open -a 'SSH ConMan'
 ```
 
-The app appears as a terminal icon in the menu bar, not in the Dock. If macOS warns that the app is from an unidentified developer, open **Applications**, Control-click **SSH ConMan**, and choose **Open**. The app is ad hoc signed and is not notarized.
+The app appears as a terminal icon in the menu bar. While its window is open, it also appears in the Dock and app switcher; closing the window leaves the menu bar icon running. If macOS warns that the app is from an unidentified developer, open **Applications**, Control-click **SSH ConMan**, and choose **Open**. The app is ad hoc signed and is not notarized.
 
 To uninstall the app:
 
@@ -29,11 +29,11 @@ Download the repository from GitHub and drag **SSH ConMan.app** to Applications.
 
 - Click the menu bar terminal icon to open or focus the window. Command–Option–Shift–/ also opens it. Escape closes the window while the menu bar app keeps running.
 - The app opens on **Recent Hosts**, showing up to 20 hosts you have connected to. Each row has **Connect** and a trash button to remove it from Recent.
-- Use **Search hosts** above the alphabetical list to filter hosts as you type. Select a host to edit its fields.
-- Click **Recent** at the top of the editor to return to Recent Hosts.
+- Use **Search...** above the alphabetical list to filter hosts as you type. Select a host to edit its fields.
+- Click **Recent** beside the bottom-left gear to return to Recent Hosts. It is disabled while Recent Hosts is already shown.
 - Open the bottom-left gear menu for **Add Host**, **Start at login**, and **Quit**. Add Host starts a new form with `~/.ssh/id_rsa` as the default identity file.
 - **Connect** opens Terminal using the values currently shown in the form, even before you save them. **Test** checks SSH access without prompting for a password and reports success or failure.
-- **Save** confirms the change and writes `~/.ssh/config`. **Delete** is available for an existing host below the form; after confirmation, it removes the host immediately. Both actions create a timestamped copy of the previous config in `~/.ssh/config-manager-backups`.
+- **Save** confirms the change and writes `~/.ssh/config`. The red **Delete** button sits beside the other form actions for an existing host; after confirmation, it removes the host immediately. Both actions create a timestamped copy of the previous config in `~/.ssh/config-manager-backups`.
 
 The app keeps other SSH directives and comments within each host entry. A non-interactive Test can fail when a host requires a password or a first-time host-key prompt, even if an interactive Connect works.
 
