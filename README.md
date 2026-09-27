@@ -5,18 +5,25 @@ A native menu bar app for managing `~/.ssh/config` on macOS 14 Sonoma or later. 
 ## Install with Homebrew
 
 ```sh
-brew tap kennethjohnbalgos/ssh-app https://github.com/kennethjohnbalgos/ssh-app.git
-brew install --cask kennethjohnbalgos/ssh-app/ssh-conman
+brew tap kennethjohnbalgos/conman-app https://github.com/kennethjohnbalgos/conman-app.git
+brew install --cask kennethjohnbalgos/conman-app/ssh-conman
 open -a 'SSH ConMan'
 ```
 
 The app appears as a terminal icon in the menu bar. While its window is open, it also appears in the Dock and app switcher; closing the window leaves the menu bar icon running. If macOS warns that the app is from an unidentified developer, open **Applications**, Control-click **SSH ConMan**, and choose **Open**. The app is ad hoc signed and is not notarized.
 
-To uninstall the app:
+If you installed from the old `ssh-app` tap, uninstall that cask and untap it before running the commands above. This does not remove your SSH configuration:
 
 ```sh
 brew uninstall --cask kennethjohnbalgos/ssh-app/ssh-conman
 brew untap kennethjohnbalgos/ssh-app
+```
+
+To uninstall the app:
+
+```sh
+brew uninstall --cask kennethjohnbalgos/conman-app/ssh-conman
+brew untap kennethjohnbalgos/conman-app
 ```
 
 Uninstalling leaves your `~/.ssh/config`, its backups, and SSH keys untouched. If you turned on **Start at login**, switch it off in the app before uninstalling, or remove SSH ConMan from **System Settings → General → Login Items** afterward.
@@ -42,8 +49,8 @@ The app keeps other SSH directives and comments within each host entry. A non-in
 Install Apple's Command Line Tools or Xcode, then run:
 
 ```sh
-git clone git@github.com:kennethjohnbalgos/ssh-app.git
-cd ssh-app
+git clone git@github.com:kennethjohnbalgos/conman-app.git
+cd conman-app
 ./build.sh
 ```
 
