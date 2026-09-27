@@ -5,7 +5,7 @@ A native menu bar app for managing `~/.ssh/config` on macOS 14 Sonoma or later. 
 ## Install with Homebrew
 
 ```sh
-brew tap kennethjohnbalgos/ssh-app
+brew tap kennethjohnbalgos/ssh-app https://github.com/kennethjohnbalgos/ssh-app.git
 brew install --cask kennethjohnbalgos/ssh-app/ssh-conman
 open -a 'SSH ConMan'
 ```
